@@ -14,3 +14,6 @@ This plugin should be enabled only for checking, and disabled after that.
 * Show the list of pages
 * Count of usage of each widget
 * Show stats for each plugin for each widget
+
+### DONE:
+* Plugin scaffold
