@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Get active elementor widgets
  * Description: Shows the widgets are currently used by elementor
@@ -31,9 +32,18 @@ function gaew_main_func()
     ?>
   <div class="wrap">
     <h2>Hi there</h2>
-    <p>
-      I hope it works
-    </p>
+
+    <?php
+//    $wm = new Widgets_Manager();
+
+    // Register widget
+    VAR_DUMP(\Elementor\Plugin::instance()->widgets_manager->ajax_get_widget_types_controls_config([]));
+
+//    add_action( 'elementor/widgets/widgets_registered', function( $widgets_manager ) {
+//        $res = $widgets_manager->get_widget_types();
+//        die(VAR_DUMP($res));
+//    }, 999 );
+    ?>
   </div>
     <?php
 }
