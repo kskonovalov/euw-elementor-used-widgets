@@ -34,15 +34,25 @@ function gaew_main_func()
     <h2>Hi there</h2>
 
     <?php
-//    $wm = new Widgets_Manager();
+    // Get Registered widgets
+    $registered = \Elementor\Plugin::instance()->widgets_manager->ajax_get_widget_types_controls_config([]);
+    VAR_DUMP(array_keys($registered));
 
-    // Register widget
-    VAR_DUMP(\Elementor\Plugin::instance()->widgets_manager->ajax_get_widget_types_controls_config([]));
+    // get post meta
+    $postID = 15368;
+    $elementorData = get_post_meta($postID, '_elementor_data', true);
+    if(!empty($elementorData)) {
+      $elementorJson = json_decode($elementorData, true);
 
-//    add_action( 'elementor/widgets/widgets_registered', function( $widgets_manager ) {
-//        $res = $widgets_manager->get_widget_types();
-//        die(VAR_DUMP($res));
-//    }, 999 );
+      $widgets = [];
+      array_walk_recursive($elementorJson, function ($value, $key) use (&$widgets) {
+          if ($key === 'widgetType') {
+              $widgets[] = $value;
+          }
+      });
+
+      VAR_DUMP($widgets);
+    }
     ?>
   </div>
     <?php
