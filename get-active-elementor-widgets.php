@@ -31,28 +31,54 @@ function gaew_main_func()
     // output
     ?>
   <div class="wrap">
-    <h2>Hi there</h2>
-
+    <h2>Used / unused elementor widgets</h2>
+      1. Get registered widgets
+      2. Get used widgets
+      ---
+      3. Get unused widgets
+      4. Get unused widgets by plugin name
     <?php
+    $otherCategoryName = "other";
+
     // Get Registered widgets
-    $registered = \Elementor\Plugin::instance()->widgets_manager->ajax_get_widget_types_controls_config([]);
-    VAR_DUMP(array_keys($registered));
+    $registeredWidgetsData = \Elementor\Plugin::instance()->widgets_manager->get_widget_types_config([]);
+//    VAR_DUMP($registeredWidgetsData);
+    $registeredWidgets = [];
+    foreach($registeredWidgetsData as $widgetID => $widgetFields) {
+      if($widgetID !== $widgetFields["name"]) {
+        die(VAR_DUMP($widgetID));
+      }
+      if(isset($widgetFields["categories"]) && is_array($widgetFields["categories"])) {
+        foreach($widgetFields["categories"] as $category) {
+            $registeredWidgets[$category][] = [
+              "id" => $widgetID,
+                "title" => $widgetFields["title"]
+            ];
+        }
+      } else {
+          $registeredWidgets[$otherCategoryName][] = $widgetID;
+      }
+    }
+    VAR_DUMP($registeredWidgets);
+//    $registeredWidgets = array_keys($registeredWidgetsData);
 
     // get post meta
     $postID = 15368;
     $elementorData = get_post_meta($postID, '_elementor_data', true);
+    $usedWidgets = [];
     if(!empty($elementorData)) {
       $elementorJson = json_decode($elementorData, true);
 
-      $widgets = [];
-      array_walk_recursive($elementorJson, function ($value, $key) use (&$widgets) {
+      array_walk_recursive($elementorJson, function ($value, $key) use (&$usedWidgets) {
           if ($key === 'widgetType') {
-              $widgets[] = $value;
+              $usedWidgets[] = $value;
           }
       });
-
-      VAR_DUMP($widgets);
     }
+
+//    VAR_DUMP($usedWidgets);
+//    $diff = array_diff($registeredWidgets, $usedWidgets);
+//    VAR_DUMP($diff);
     ?>
   </div>
     <?php
