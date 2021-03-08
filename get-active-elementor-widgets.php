@@ -32,11 +32,6 @@ function gaew_main_func() {
   ?>
     <div class="wrap">
         <h2>Used / unused elementor widgets</h2>
-        1. Get registered widgets
-        2. Get used widgets
-        ---
-        3. Get unused widgets
-        4. Get unused widgets by plugin name
       <?php
       $otherCategoryName = "other";
 
