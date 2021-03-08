@@ -1,4 +1,4 @@
-## Plugin is in active development, it doesn't work now!
+## Plugin is in active development!
 
 # Get active Elementor widgets plugin for WordPress
 

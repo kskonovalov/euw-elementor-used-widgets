@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Get active elementor widgets
  * Description: Shows the widgets are currently used by elementor
- * Version: 0.1
+ * Version: 0.0.1
  * Author: Konstantin
  * Author URI: https://kskonovalov.me
  * Text Domain: gaew
@@ -67,7 +67,7 @@ function gaew_main_func() {
         'category'         => 0,
         'orderby'          => 'date',
         'order'            => 'DESC',
-        'post_type'        => 'page',
+        'post_type'        => 'any',
         'suppress_filters' => true, // подавление работы фильтров изменения SQL запроса
       ) );
 
@@ -77,14 +77,16 @@ function gaew_main_func() {
         $pageID        = $page->ID;
         $pageLink      = get_the_permalink( $page );
         $pageTitle     = $page->post_title;
+        $pageType      = $page->post_type;
         $elementorData = get_post_meta( $pageID, '_elementor_data', true );
         if ( ! empty( $elementorData ) ) {
           $elementorJson = json_decode( $elementorData, true );
-          array_walk_recursive( $elementorJson, static function ( $value, $key ) use ( &$usedWidgets, &$usedWidgetsByPage, $pageID, $pageLink, $pageTitle ) {
+          array_walk_recursive( $elementorJson, static function ( $value, $key ) use ( &$usedWidgets, &$usedWidgetsByPage, $pageID, $pageLink, $pageTitle, $pageType ) {
             if ( $key === 'widgetType' ) {
               $usedWidgets[]                          = $value;
               $usedWidgetsByPage[ $value ][ $pageID ] = [
                 "id"    => $pageID,
+                "type"  => $pageType,
                 "link"  => $pageLink,
                 "title" => $pageTitle
               ];
