@@ -60,27 +60,47 @@ function gaew_main_func() {
       //    $registeredWidgets = array_keys($registeredWidgetsData);
 
       // get post meta
-      $postID        = 15368;
-      $elementorData = get_post_meta( $postID, '_elementor_data', true );
-      $usedWidgets   = [];
-      if ( ! empty( $elementorData ) ) {
-        $elementorJson = json_decode( $elementorData, true );
+      // TODO: for all pages
+      // параметры по умолчанию
+      $pages = get_posts( array(
+        'numberposts'      => - 1,
+        'category'         => 0,
+        'orderby'          => 'date',
+        'order'            => 'DESC',
+        'post_type'        => 'page',
+        'suppress_filters' => true, // подавление работы фильтров изменения SQL запроса
+      ) );
 
-        array_walk_recursive( $elementorJson, function ( $value, $key ) use ( &$usedWidgets ) {
-          if ( $key === 'widgetType' ) {
-            $usedWidgets[] = $value;
-          }
-        } );
+      $usedWidgets       = [];
+      $usedWidgetsByPage = [];
+      foreach ( $pages as $page ) {
+        $pageID        = $page->ID;
+        $pageLink      = get_the_permalink( $page );
+        $pageTitle     = $page->post_title;
+        $elementorData = get_post_meta( $pageID, '_elementor_data', true );
+        if ( ! empty( $elementorData ) ) {
+          $elementorJson = json_decode( $elementorData, true );
+          array_walk_recursive( $elementorJson, static function ( $value, $key ) use ( &$usedWidgets, &$usedWidgetsByPage, $pageID, $pageLink, $pageTitle ) {
+            if ( $key === 'widgetType' ) {
+              $usedWidgets[]                          = $value;
+              $usedWidgetsByPage[ $value ][ $pageID ] = [
+                "id"    => $pageID,
+                "link"  => $pageLink,
+                "title" => $pageTitle
+              ];
+            }
+          } );
+        }
       }
 
       //      VAR_DUMP($registeredWidgets, $usedWidgets);
-      $usedColor = "#b35082";
+      $usedColor   = "#b35082";
       $unusedColor = "#71b350";
-      $usedIcon = "&check;";
-      $unusedIcon = "&cross;";
-      echo '<table cellspacing="0" cellpadding="0">';
+      $usedIcon    = "&check;";
+      $unusedIcon  = "&cross;";
+      echo '<table cellspacing="0" cellpadding="0" class="widefat fixed" style="width: 600px; max-width: 100%;">';
       foreach ( $registeredWidgets as $categoryName => $category ) {
-        echo "<tr><th colspan='2'>{$categoryName}</th></tr>";
+        echo "<thead><tr><th colspan='2' class='manage-column'>{$categoryName}</th><th class='manage-column'>Page</th></tr></thead><tbody>";
         foreach ( $category as $widget ) {
           if ( empty( $widget["id"] ) ) {
             // TODO: check skipped?
@@ -93,18 +113,27 @@ function gaew_main_func() {
           } else if ( ! empty( $widget["id"] ) ) {
             $title = $widget["id"];
           }
-          if(in_array($widget["id"], $usedWidgets, true)) {
-              $statusColor = $usedColor;
-              $statusIcon = $usedIcon;
+          if ( in_array( $widget["id"], $usedWidgets, true ) ) {
+            $pages       = [];
+            $statusColor = $usedColor;
+            $statusIcon  = $usedIcon;
+            if ( isset( $usedWidgetsByPage[ $widget["id"] ] ) && is_array( $usedWidgetsByPage[ $widget["id"] ] ) ) {
+              foreach ( $usedWidgetsByPage[ $widget["id"] ] as $usedInPages ) {
+                $pages[] = "<a href='{$usedInPages["link"]}' title='{$usedInPages["title"]}' target='_blank'>{$usedInPages["id"]}</a>";
+              }
+            }
+            $pages = implode( ", ", $pages );
           } else {
+            $pages       = "";
             $statusColor = $unusedColor;
-            $statusIcon = $unusedIcon;
+            $statusIcon  = $unusedIcon;
           }
 
-          echo "<tr><td style='color: {$statusColor};'>{$statusIcon}</td><td style='color: {$statusColor};'>{$title}</td></tr>";
+
+          echo "<tr><td style='color: {$statusColor}; width: 30px;'>{$statusIcon}</td><td style='color: {$statusColor};'>{$title}</td><td>{$pages}</td></tr>";
         }
       }
-      echo '</table>';
+      echo '</tbody></table>';
 
       //    VAR_DUMP($usedWidgets);
       //    $diff = array_diff($registeredWidgets, $usedWidgets);
