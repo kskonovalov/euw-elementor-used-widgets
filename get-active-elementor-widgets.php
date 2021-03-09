@@ -54,36 +54,54 @@ function gaew_main_func() {
       //      VAR_DUMP( $registeredWidgets );
       //    $registeredWidgets = array_keys($registeredWidgetsData);
 
-      // get post meta
-      // TODO: for all pages
-      // параметры по умолчанию
-      $pages = get_posts( array(
-        'numberposts'      => - 1,
-        'category'         => 0,
-        'orderby'          => 'date',
-        'order'            => 'DESC',
-        'post_type'        => 'any',
-        'suppress_filters' => true, // подавление работы фильтров изменения SQL запроса
+      $usedPostTypes    = get_post_types( array() );
+      $postTypesToUnset = array(
+        'attachment',
+        'revision',
+        'nav_menu_item',
+        'custom_css',
+        'customize_changeset',
+        'oembed_cache',
+        'user_request',
+        'elementor_font',
+        'elementor_icons'
+      );
+      foreach ( $usedPostTypes as $id => $post_type ) {
+        if ( in_array( $post_type, $postTypesToUnset, true ) ) {
+          unset( $usedPostTypes[$id] );
+        }
+      }
+      // get all posts to check
+      $postsQuery = new WP_Query;
+      $posts      = $postsQuery->query( array(
+        'nopaging'            => true,
+        'posts_per_page'      => - 1,
+        'category'            => 0,
+        'orderby'             => 'date',
+        'order'               => 'DESC',
+        'post_type'           => $usedPostTypes,
+        'post_status'         => array( 'publish', 'pending', 'draft', 'auto-draft', 'future', 'private' ),
+        'exclude_from_search' => false
       ) );
 
       $usedWidgets       = [];
       $usedWidgetsByPage = [];
-      foreach ( $pages as $page ) {
-        $pageID        = $page->ID;
-        $pageLink      = get_the_permalink( $page );
-        $pageTitle     = $page->post_title;
-        $pageType      = $page->post_type;
-        $elementorData = get_post_meta( $pageID, '_elementor_data', true );
+      foreach ( $posts as $post ) {
+        $postID        = $post->ID;
+        $postLink      = get_the_permalink( $post );
+        $postTitle     = $post->post_title;
+        $postType      = $post->post_type;
+        $elementorData = get_post_meta( $postID, '_elementor_data', true );
         if ( ! empty( $elementorData ) ) {
           $elementorJson = json_decode( $elementorData, true );
-          array_walk_recursive( $elementorJson, static function ( $value, $key ) use ( &$usedWidgets, &$usedWidgetsByPage, $pageID, $pageLink, $pageTitle, $pageType ) {
+          array_walk_recursive( $elementorJson, static function ( $value, $key ) use ( &$usedWidgets, &$usedWidgetsByPage, $postID, $postLink, $postTitle, $postType ) {
             if ( $key === 'widgetType' ) {
               $usedWidgets[]                          = $value;
-              $usedWidgetsByPage[ $value ][ $pageID ] = [
-                "id"    => $pageID,
-                "type"  => $pageType,
-                "link"  => $pageLink,
-                "title" => $pageTitle
+              $usedWidgetsByPage[ $value ][ $postID ] = [
+                "id"    => $postID,
+                "type"  => $postType,
+                "link"  => $postLink,
+                "title" => $postTitle
               ];
             }
           } );
@@ -111,23 +129,23 @@ function gaew_main_func() {
             $title = $widget["id"];
           }
           if ( in_array( $widget["id"], $usedWidgets, true ) ) {
-            $pages       = [];
+            $posts       = [];
             $statusColor = $usedColor;
             $statusIcon  = $usedIcon;
             if ( isset( $usedWidgetsByPage[ $widget["id"] ] ) && is_array( $usedWidgetsByPage[ $widget["id"] ] ) ) {
               foreach ( $usedWidgetsByPage[ $widget["id"] ] as $usedInPages ) {
-                $pages[] = "<a href='{$usedInPages["link"]}' title='{$usedInPages["title"]}' target='_blank'>{$usedInPages["id"]}</a>";
+                $posts[] = "<a href='{$usedInPages["link"]}' title='{$usedInPages["title"]}' target='_blank'>{$usedInPages["title"]}</a>";
               }
             }
-            $pages = implode( ", ", $pages );
+            $posts = implode( ", ", $posts );
           } else {
-            $pages       = "";
+            $posts       = "";
             $statusColor = $unusedColor;
             $statusIcon  = $unusedIcon;
           }
 
 
-          echo "<tr><td style='color: {$statusColor}; width: 30px;'>{$statusIcon}</td><td style='color: {$statusColor};'>{$title}</td><td>{$pages}</td></tr>";
+          echo "<tr><td style='color: {$statusColor}; width: 30px;'>{$statusIcon}</td><td style='color: {$statusColor};'>{$title}</td><td>{$posts}</td></tr>";
         }
       }
       echo '</tbody></table>';
