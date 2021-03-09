@@ -14,12 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 define( 'GAEW_URL', plugin_dir_url( __FILE__ ) );
 
-add_action( 'admin_menu', 'gaew_get_page' );
+add_action( 'admin_menu', 'gaew_get_page', 99 );
 function gaew_get_page() {
   add_submenu_page(
-    'tools.php',
-    'Get active elementor widgets',
-    'Elementor widgets',
+    'elementor',
+    'Get used elementor widgets',
+    'Used widgets',
     'manage_options',
     'get-active-elementor-widgets',
     'gaew_main_func'
