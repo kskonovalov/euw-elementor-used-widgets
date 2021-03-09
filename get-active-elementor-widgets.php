@@ -1,44 +1,61 @@
 <?php
-
 /**
- * Plugin Name: Get active elementor widgets
- * Description: Shows the widgets are currently used by elementor
- * Version: 0.0.1
- * Author: Konstantin
+ * Plugin Name: Elementor used widgets
+ * Description: Displays the widgets are currently used by elementor
+ * Plugin URI:  https://github.com/kskonovalov/get-active-elementor-widgets
+ * GitHub Plugin URI: https://github.com/kskonovalov/get-active-elementor-widgets
+ * Version: 0.1
+ * Author: Konstantin Konovalov
  * Author URI: https://kskonovalov.me
- * Text Domain: gaew
+ * Text Domain: get-active-elementor-widgets
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
   exit;
 }
-define( 'GAEW_URL', plugin_dir_url( __FILE__ ) );
+define( 'EUW_URL', plugin_dir_url( __FILE__ ) );
 
-add_action( 'admin_menu', 'gaew_get_page', 99 );
-function gaew_get_page() {
+function aew_get_menu_link() {
+  return 'get-active-elementor-widgets';
+}
+
+// add link to the menu
+add_action( 'admin_menu', 'euw_add_link_to_menu', 99 );
+function euw_add_link_to_menu() {
   add_submenu_page(
     'elementor',
     'Get used elementor widgets',
     'Used widgets',
     'manage_options',
-    'get-active-elementor-widgets',
-    'gaew_main_func'
+    aew_get_menu_link(),
+    'euw_main_func',
+    9000 // TODO
   );
 }
 
-//settings page
-function gaew_main_func() {
-  // output
+// add settings link to the plugins list
+function aew_plugin_settings_link( $links ) {
+  $list_text     = __( 'Used widgets list', 'get-active-elementor-widgets' );
+  $settings_link = "<a href='admin.php?page=" . aew_get_menu_link() . "'>{$list_text}</a>";
+  array_unshift( $links, $settings_link );
+
+  return $links;
+}
+
+$plugin = plugin_basename( __FILE__ );
+add_filter( "plugin_action_links_$plugin", 'aew_plugin_settings_link' );
+
+// page with the result
+function euw_main_func() {
   ?>
     <div class="wrap">
         <h2>Used / unused elementor widgets</h2>
       <?php
       $otherCategoryName = "other";
-
       // Get Registered widgets
-      $registeredWidgetsData = \Elementor\Plugin::instance()->widgets_manager->get_widget_types_config( [] );
-      //    VAR_DUMP($registeredWidgetsData);
-      $registeredWidgets = [];
+      // I avoided to use the short array notification for better compatibility
+      $registeredWidgetsData = \Elementor\Plugin::instance()->widgets_manager->get_widget_types_config( array() );
+      $registeredWidgets     = [];
       foreach ( $registeredWidgetsData as $widgetID => $widgetFields ) {
         if ( isset( $widgetFields["categories"] ) && is_array( $widgetFields["categories"] ) ) {
           foreach ( $widgetFields["categories"] as $category ) {
@@ -68,7 +85,7 @@ function gaew_main_func() {
       );
       foreach ( $usedPostTypes as $id => $post_type ) {
         if ( in_array( $post_type, $postTypesToUnset, true ) ) {
-          unset( $usedPostTypes[$id] );
+          unset( $usedPostTypes[ $id ] );
         }
       }
       // get all posts to check
