@@ -52,6 +52,15 @@ function euw_main_func() {
     <div class="wrap">
         <h2><?php echo $pageTitle; ?></h2>
       <?php
+
+      // Check if Elementor installed and activated
+      if ( ! did_action( 'elementor/loaded' ) ) {
+        add_action( 'admin_notices', 'euw_admin_notice_missing_main_plugin' );
+        echo "</div>";
+
+        return;
+      }
+
       $otherCategoryName = "other";
       // Get Registered widgets
       $registeredWidgetsData = \Elementor\Plugin::instance()->widgets_manager->get_widget_types_config( [] );
@@ -121,12 +130,12 @@ function euw_main_func() {
         }
       }
 
-      $usedColor   = "#b35082";
-      $unusedColor = "#71b350";
-      $usedIcon    = "&check;";
-      $unusedIcon  = "&cross;";
-      $categoryText    = __( "Category", euw_title() );
-      $editText    = __( "Edit", euw_title() );
+      $usedColor    = "#b35082";
+      $unusedColor  = "#71b350";
+      $usedIcon     = "&check;";
+      $unusedIcon   = "&cross;";
+      $categoryText = __( "Category", euw_title() );
+      $editText     = __( "Edit", euw_title() );
       echo '<table cellspacing="0" cellpadding="0" class="widefat fixed" style="width: 800px; max-width: 100%;">';
       foreach ( $registeredWidgets as $categoryName => $category ) {
         echo "<thead><tr><th class='manage-column' style='width: 200px;'><b>{$categoryText}:</b> {$categoryName}</th><th class='manage-column'>Page</th></tr></thead><tbody>";
@@ -167,4 +176,19 @@ function euw_main_func() {
       ?>
     </div>
   <?php
+}
+
+function euw_admin_notice_missing_main_plugin() {
+
+  if ( isset( $_GET['activate'] ) ) unset( $_GET['activate'] );
+
+  $message = sprintf(
+  /* translators: 1: Plugin name 2: Elementor */
+    esc_html__( '"%1$s" requires "%2$s" to be installed and activated.', 'elementor-test-extension' ),
+    '<strong>' . esc_html__( 'Elementor used widgets', 'elementor-test-extension' ) . '</strong>',
+    '<strong>' . esc_html__( 'Elementor', euw_title() ) . '</strong>'
+  );
+
+  printf( '<div class="notice notice-warning is-dismissible"><p>%1$s</p></div>', $message );
+
 }
