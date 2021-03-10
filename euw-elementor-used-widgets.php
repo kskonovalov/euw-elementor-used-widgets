@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 define( 'EUW_URL', plugin_dir_url( __FILE__ ) );
 
-function euw_get_menu_link() {
+function euw_title() {
   return 'euw-elementor-used-widgets';
 }
 
@@ -27,7 +27,7 @@ function euw_add_link_to_menu() {
     'Elementor used widgets',
     'Used widgets',
     'manage_options',
-    euw_get_menu_link(),
+    euw_title(),
     'euw_main_func',
     9000 // TODO
   );
@@ -35,8 +35,8 @@ function euw_add_link_to_menu() {
 
 // add settings link to the plugins list
 function euw_plugin_settings_link( $links ) {
-  $list_text     = __( 'Used widgets', euw_get_menu_link() );
-  $settings_link = "<a href='admin.php?page=" . euw_get_menu_link() . "'>{$list_text}</a>";
+  $list_text     = __( 'Used widgets', euw_title() );
+  $settings_link = "<a href='admin.php?page=" . euw_title() . "'>{$list_text}</a>";
   array_unshift( $links, $settings_link );
 
   return $links;
@@ -47,14 +47,14 @@ add_filter( "plugin_action_links_$plugin", 'euw_plugin_settings_link' );
 
 // page with the result
 function euw_main_func() {
+  $pageTitle = __( "Used / unused elementor widgets", euw_title() );
   ?>
     <div class="wrap">
-        <h2>Used / unused elementor widgets</h2>
+        <h2><?php echo $pageTitle; ?></h2>
       <?php
       $otherCategoryName = "other";
       // Get Registered widgets
-      // I avoided to use the short array notification for better compatibility
-      $registeredWidgetsData = \Elementor\Plugin::instance()->widgets_manager->get_widget_types_config( array() );
+      $registeredWidgetsData = \Elementor\Plugin::instance()->widgets_manager->get_widget_types_config( [] );
       $registeredWidgets     = [];
       foreach ( $registeredWidgetsData as $widgetID => $widgetFields ) {
         if ( isset( $widgetFields["categories"] ) && is_array( $widgetFields["categories"] ) ) {
@@ -68,11 +68,9 @@ function euw_main_func() {
           $registeredWidgets[ $otherCategoryName ][] = $widgetID;
         }
       }
-      //      VAR_DUMP( $registeredWidgets );
-      //    $registeredWidgets = array_keys($registeredWidgetsData);
 
-      $usedPostTypes    = get_post_types( array() );
-      $postTypesToUnset = array(
+      $usedPostTypes    = get_post_types( [] );
+      $postTypesToUnset = [
         'attachment',
         'revision',
         'nav_menu_item',
@@ -82,7 +80,7 @@ function euw_main_func() {
         'user_request',
         'elementor_font',
         'elementor_icons'
-      );
+      ];
       foreach ( $usedPostTypes as $id => $post_type ) {
         if ( in_array( $post_type, $postTypesToUnset, true ) ) {
           unset( $usedPostTypes[ $id ] );
@@ -90,7 +88,7 @@ function euw_main_func() {
       }
       // get all posts to check
       $postsQuery = new WP_Query;
-      $posts      = $postsQuery->query( array(
+      $posts      = $postsQuery->query( [
         'nopaging'            => true,
         'posts_per_page'      => - 1,
         'category'            => 0,
@@ -99,18 +97,18 @@ function euw_main_func() {
         'post_type'           => $usedPostTypes,
         'post_status'         => array( 'publish', 'pending', 'draft', 'auto-draft', 'future', 'private' ),
         'exclude_from_search' => false
-      ) );
+      ] );
 
-      $usedWidgets       = array();
-      $usedWidgetsByPage = array();
+      $usedWidgets       = [];
+      $usedWidgetsByPage = [];
       foreach ( $posts as $post ) {
-        $postData      = array(
+        $postData      = [
           'id'    => $post->ID,
           'link'  => get_the_permalink( $post ),
           'edit'  => get_edit_post_link( $post ),
           'title' => $post->post_title,
           'type'  => $post->post_type
-        );
+        ];
         $elementorData = get_post_meta( $postData["id"], '_elementor_data', true );
         if ( ! empty( $elementorData ) ) {
           $elementorJson = json_decode( $elementorData, true );
@@ -165,10 +163,6 @@ function euw_main_func() {
         }
       }
       echo '</tbody></table>';
-
-      //    VAR_DUMP($usedWidgets);
-      //    $diff = array_diff($registeredWidgets, $usedWidgets);
-      //    VAR_DUMP($diff);
       ?>
     </div>
   <?php
