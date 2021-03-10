@@ -101,25 +101,24 @@ function euw_main_func() {
         'exclude_from_search' => false
       ) );
 
-      $usedWidgets       = [];
-      $usedWidgetsByPage = [];
+      $usedWidgets       = array();
+      $usedWidgetsByPage = array();
       foreach ( $posts as $post ) {
-        $postID        = $post->ID;
-        $postLink      = get_the_permalink( $post );
-        $postTitle     = $post->post_title;
-        $postType      = $post->post_type;
-        $elementorData = get_post_meta( $postID, '_elementor_data', true );
+//          VAR_DUMP($post);
+        $postData      = array(
+          'id'    => $post->ID,
+          'link'  => get_the_permalink( $post ),
+          'edit'  => get_edit_post_link( $post ),
+          'title' => $post->post_title,
+          'type'  => $post->post_type
+        );
+        $elementorData = get_post_meta( $postData["id"], '_elementor_data', true );
         if ( ! empty( $elementorData ) ) {
           $elementorJson = json_decode( $elementorData, true );
-          array_walk_recursive( $elementorJson, static function ( $value, $key ) use ( &$usedWidgets, &$usedWidgetsByPage, $postID, $postLink, $postTitle, $postType ) {
+          array_walk_recursive( $elementorJson, static function ( $value, $key ) use ( &$usedWidgets, &$usedWidgetsByPage, $postData ) {
             if ( $key === 'widgetType' ) {
-              $usedWidgets[]                          = $value;
-              $usedWidgetsByPage[ $value ][ $postID ] = [
-                "id"    => $postID,
-                "type"  => $postType,
-                "link"  => $postLink,
-                "title" => $postTitle
-              ];
+              $usedWidgets[]                                  = $value;
+              $usedWidgetsByPage[ $value ][ $postData["id"] ] = $postData;
             }
           } );
         }
@@ -130,6 +129,7 @@ function euw_main_func() {
       $unusedColor = "#71b350";
       $usedIcon    = "&check;";
       $unusedIcon  = "&cross;";
+      $editText    = __( "Edit", 'get-active-elementor-widgets' );
       echo '<table cellspacing="0" cellpadding="0" class="widefat fixed" style="width: 600px; max-width: 100%;">';
       foreach ( $registeredWidgets as $categoryName => $category ) {
         echo "<thead><tr><th colspan='2' class='manage-column'>{$categoryName}</th><th class='manage-column'>Page</th></tr></thead><tbody>";
@@ -151,7 +151,8 @@ function euw_main_func() {
             $statusIcon  = $usedIcon;
             if ( isset( $usedWidgetsByPage[ $widget["id"] ] ) && is_array( $usedWidgetsByPage[ $widget["id"] ] ) ) {
               foreach ( $usedWidgetsByPage[ $widget["id"] ] as $usedInPages ) {
-                $posts[] = "<a href='{$usedInPages["link"]}' title='{$usedInPages["title"]}' target='_blank'>{$usedInPages["title"]}</a>";
+                $posts[] = "<a href='{$usedInPages["link"]}' title='{$usedInPages["title"]}' target='_blank'>{$usedInPages["title"]}</a>
+<a href='{$usedInPages["edit"]}' title='{$editText}' target='_blank'>(&para;){$usedInPages["type"]}</a>";
               }
             }
             $posts = implode( ", ", $posts );
