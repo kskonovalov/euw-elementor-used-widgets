@@ -47,7 +47,7 @@ add_filter( "plugin_action_links_$plugin", 'euw_plugin_settings_link' );
 
 // page with the result
 function euw_main_func() {
-  $pageTitle = __( "Used / unused elementor widgets", euw_title() );
+  $pageTitle = __( "Used elementor widgets", euw_title() );
   ?>
     <div class="wrap">
         <h2><?php echo $pageTitle; ?></h2>
@@ -125,10 +125,11 @@ function euw_main_func() {
       $unusedColor = "#71b350";
       $usedIcon    = "&check;";
       $unusedIcon  = "&cross;";
-      $editText    = __( "Edit", 'euw-elementor-used-widgets' );
-      echo '<table cellspacing="0" cellpadding="0" class="widefat fixed" style="width: 600px; max-width: 100%;">';
+      $categoryText    = __( "Category", euw_title() );
+      $editText    = __( "Edit", euw_title() );
+      echo '<table cellspacing="0" cellpadding="0" class="widefat fixed" style="width: 800px; max-width: 100%;">';
       foreach ( $registeredWidgets as $categoryName => $category ) {
-        echo "<thead><tr><th colspan='2' class='manage-column'>{$categoryName}</th><th class='manage-column'>Page</th></tr></thead><tbody>";
+        echo "<thead><tr><th class='manage-column' style='width: 200px;'><b>{$categoryText}:</b> {$categoryName}</th><th class='manage-column'>Page</th></tr></thead><tbody>";
         foreach ( $category as $widget ) {
           if ( empty( $widget["id"] ) ) {
             // TODO: check skipped?
@@ -148,7 +149,7 @@ function euw_main_func() {
             if ( isset( $usedWidgetsByPage[ $widget["id"] ] ) && is_array( $usedWidgetsByPage[ $widget["id"] ] ) ) {
               foreach ( $usedWidgetsByPage[ $widget["id"] ] as $usedInPages ) {
                 $posts[] = "<a href='{$usedInPages["link"]}' title='{$usedInPages["title"]}' target='_blank'>{$usedInPages["title"]}</a>
-<a href='{$usedInPages["edit"]}' title='{$editText}' target='_blank'>(&para;){$usedInPages["type"]}</a>";
+<a href='{$usedInPages["edit"]}' title='{$editText}' target='_blank'>(&para;)</a>";
               }
             }
             $posts = implode( ", ", $posts );
@@ -159,7 +160,7 @@ function euw_main_func() {
           }
 
 
-          echo "<tr><td style='color: {$statusColor}; width: 30px;'>{$statusIcon}</td><td style='color: {$statusColor};'>{$title}</td><td>{$posts}</td></tr>";
+          echo "<tr><td style='color: {$statusColor}; width: 30px;'>{$statusIcon} {$title}</td><td>{$posts}</td></tr>";
         }
       }
       echo '</tbody></table>';
