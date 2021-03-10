@@ -4,7 +4,7 @@
  * Description: Displays the widgets which are currently used by elementor
  * Plugin URI:  https://github.com/kskonovalov/euw-elementor-used-widgets
  * GitHub Plugin URI: https://github.com/kskonovalov/euw-elementor-used-widgets
- * Version: 0.1
+ * Version: 0.1.1
  * Author: Konstantin Konovalov
  * Author URI: https://kskonovalov.me
  * Text Domain: euw-elementor-used-widgets
@@ -20,7 +20,7 @@ function euw_title() {
 }
 
 // add link to the menu
-add_action( 'admin_menu', 'euw_add_link_to_menu', 99 );
+add_action( 'admin_menu', 'euw_add_link_to_menu', 999 );
 function euw_add_link_to_menu() {
   add_submenu_page(
     'elementor',
@@ -29,7 +29,7 @@ function euw_add_link_to_menu() {
     'manage_options',
     euw_title(),
     'euw_main_func',
-    9000 // TODO
+    100 // TODO
   );
 }
 
