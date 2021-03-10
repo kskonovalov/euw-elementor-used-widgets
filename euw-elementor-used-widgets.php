@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: Elementor used widgets
- * Description: Displays the widgets are currently used by elementor
- * Plugin URI:  https://github.com/kskonovalov/get-active-elementor-widgets
- * GitHub Plugin URI: https://github.com/kskonovalov/get-active-elementor-widgets
+ * Description: Displays the widgets which are currently used by elementor
+ * Plugin URI:  https://github.com/kskonovalov/euw-elementor-used-widgets
+ * GitHub Plugin URI: https://github.com/kskonovalov/euw-elementor-used-widgets
  * Version: 0.1
  * Author: Konstantin Konovalov
  * Author URI: https://kskonovalov.me
- * Text Domain: get-active-elementor-widgets
+ * Text Domain: euw-elementor-used-widgets
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,8 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 define( 'EUW_URL', plugin_dir_url( __FILE__ ) );
 
-function aew_get_menu_link() {
-  return 'get-active-elementor-widgets';
+function euw_get_menu_link() {
+  return 'euw-elementor-used-widgets';
 }
 
 // add link to the menu
@@ -24,26 +24,26 @@ add_action( 'admin_menu', 'euw_add_link_to_menu', 99 );
 function euw_add_link_to_menu() {
   add_submenu_page(
     'elementor',
-    'Get used elementor widgets',
+    'Elementor used widgets',
     'Used widgets',
     'manage_options',
-    aew_get_menu_link(),
+    euw_get_menu_link(),
     'euw_main_func',
     9000 // TODO
   );
 }
 
 // add settings link to the plugins list
-function aew_plugin_settings_link( $links ) {
-  $list_text     = __( 'Used widgets list', 'get-active-elementor-widgets' );
-  $settings_link = "<a href='admin.php?page=" . aew_get_menu_link() . "'>{$list_text}</a>";
+function euw_plugin_settings_link( $links ) {
+  $list_text     = __( 'Used widgets', euw_get_menu_link() );
+  $settings_link = "<a href='admin.php?page=" . euw_get_menu_link() . "'>{$list_text}</a>";
   array_unshift( $links, $settings_link );
 
   return $links;
 }
 
 $plugin = plugin_basename( __FILE__ );
-add_filter( "plugin_action_links_$plugin", 'aew_plugin_settings_link' );
+add_filter( "plugin_action_links_$plugin", 'euw_plugin_settings_link' );
 
 // page with the result
 function euw_main_func() {
@@ -104,7 +104,6 @@ function euw_main_func() {
       $usedWidgets       = array();
       $usedWidgetsByPage = array();
       foreach ( $posts as $post ) {
-//          VAR_DUMP($post);
         $postData      = array(
           'id'    => $post->ID,
           'link'  => get_the_permalink( $post ),
@@ -124,12 +123,11 @@ function euw_main_func() {
         }
       }
 
-      //      VAR_DUMP($registeredWidgets, $usedWidgets);
       $usedColor   = "#b35082";
       $unusedColor = "#71b350";
       $usedIcon    = "&check;";
       $unusedIcon  = "&cross;";
-      $editText    = __( "Edit", 'get-active-elementor-widgets' );
+      $editText    = __( "Edit", 'euw-elementor-used-widgets' );
       echo '<table cellspacing="0" cellpadding="0" class="widefat fixed" style="width: 600px; max-width: 100%;">';
       foreach ( $registeredWidgets as $categoryName => $category ) {
         echo "<thead><tr><th colspan='2' class='manage-column'>{$categoryName}</th><th class='manage-column'>Page</th></tr></thead><tbody>";
