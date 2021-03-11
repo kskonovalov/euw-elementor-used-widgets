@@ -29,7 +29,7 @@ function euw_add_link_to_menu() {
     'manage_options',
     euw_title(),
     'euw_main_func',
-    100 // TODO
+    100
   );
 }
 
