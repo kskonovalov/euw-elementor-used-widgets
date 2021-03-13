@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Elementor used widgets
+ * Plugin Name: EUW Elementor used widgets
  * Description: Displays the widgets which are currently used by elementor
  * Plugin URI:  https://github.com/kskonovalov/euw-elementor-used-widgets
  * GitHub Plugin URI: https://github.com/kskonovalov/euw-elementor-used-widgets
