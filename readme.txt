@@ -1,10 +1,10 @@
-=== Elementor Used Widgets ===
+=== EUW Elementor Used Widgets ===
 Contributors: dependencyinjection
 Tags: elementor, performance
 Requires at least: 5.0
 Tested up to: 5.6
 Requires PHP: 5.6.20
-Stable tag: 0.1
+Stable tag: 0.1.1
 License: GPL v2 or later
 
 Used Elementor Widgets plugin for WordPress
