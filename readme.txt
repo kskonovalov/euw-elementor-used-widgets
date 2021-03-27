@@ -7,7 +7,7 @@ Requires PHP: 5.6.20
 Stable tag: 0.1.1
 License: GPL v2 or later
 
-Used Elementor Widgets plugin for WordPress
+Plugin helps to find widgets currently used in Elementor
 
 == Description ==
 Less plugins you have on site, faster it's working(usually). But sometimes you couldn't say if the plugin is used on website or not.
